@@ -17,7 +17,6 @@ void PanasonicClimate::transmit_state() {
   uint16_t fan_speed = this->fan_speed_();   
   remote_state[16] = fan_speed >> 8;         
 
-  // Calculate checksum
   for (int i = 8; i < (PANASONIC_STATE_FRAME_SIZE - 1) ; i++) {
     remote_state[26] += remote_state[i];
   }
@@ -30,7 +29,7 @@ void PanasonicClimate::transmit_state() {
   data->space(PANASONIC_HEADER_SPACE);
 
   for (int i = 0; i < 8; i++) {
-    for (uint8_t mask = 1; mask > 0; mask <<= 1) {  // iterate through bit mask
+    for (uint8_t mask = 1; mask > 0; mask <<= 1) {
       data->mark(PANASONIC_BIT_MARK);
       bool bit = remote_state[i] & mask;
       data->space(bit ? PANASONIC_ONE_SPACE : PANASONIC_ZERO_SPACE);
@@ -44,7 +43,7 @@ void PanasonicClimate::transmit_state() {
   data->space(PANASONIC_HEADER_SPACE);
 
   for (int i = 8; i < 27; i++) {
-    for (uint8_t mask = 1; mask > 0; mask <<= 1) {  // iterate through bit mask
+    for (uint8_t mask = 1; mask > 0; mask <<= 1) {
       data->mark(PANASONIC_BIT_MARK);
       bool bit = remote_state[i] & mask;
       data->space(bit ? PANASONIC_ONE_SPACE : PANASONIC_ZERO_SPACE);
@@ -110,7 +109,6 @@ uint16_t PanasonicClimate::fan_speed_() {
 }
 
 uint8_t PanasonicClimate::temperature_() {
-  // Force special temperatures depending on the mode
   switch (this->mode) {
     case climate::CLIMATE_MODE_AUTO:
     case climate::CLIMATE_MODE_DRY:
@@ -196,23 +194,18 @@ bool PanasonicClimate::on_receive(remote_base::RemoteReceiveData data) {
     }
     state_frame[pos] = byte;
     if (pos == 0) {
-      // frame header
       if (byte != 0x02)
         return false;
     } else if (pos == 1) {
-      // frame header
       if (byte != 0x20)
         return false;
     } else if (pos == 2) {
-      // frame header
       if (byte != 0xE0)
         return false;
     } else if (pos == 3) {
-      // frame header
       if (byte != 0x04)
         return false;
     } else if (pos == 4) {
-      // frame type
       if (byte != 0x00)
         return false;
     }
