@@ -5,7 +5,7 @@
 namespace esphome {
 namespace panasonic {
 
-// Values for Panasonic ARC43XXX IR Controllers
+// Values for Panasonic A75C3747 IR Controllers
 // Temperature
 const uint8_t PANASONIC_TEMP_MIN = 16;  // Celsius
 const uint8_t PANASONIC_TEMP_MAX = 30;  // Celsius
@@ -22,9 +22,7 @@ const uint8_t PANASONIC_MODE_ON = 0x01;
 const uint8_t PANASONIC_FAN_AUTO = 0xA0;
 const uint8_t PANASONIC_FAN_SILENT = 0xB0;
 const uint8_t PANASONIC_FAN_1 = 0x30;
-const uint8_t PANASONIC_FAN_2 = 0x40;
 const uint8_t PANASONIC_FAN_3 = 0x50;
-const uint8_t PANASONIC_FAN_4 = 0x60;
 const uint8_t PANASONIC_FAN_5 = 0x70;
 
 // IR Transmission
