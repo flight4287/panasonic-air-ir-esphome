@@ -5,4 +5,6 @@ Panaasonic Climat IR компонент для ESP Home.
 
 Не реализовано:
 - таймер;
-- режим управления апотоком воздуха (в ESP Home нет состояний кроме VERTICAL/HORIZONTAL/BOTH/OFF).
+- режим управления потоком воздуха (в ESP Home нет состояний кроме VERTICAL/HORIZONTAL/BOTH/OFF).
+
+За основу взят код от компонента Daikin https://github.com/esphome/esphome/tree/dev/esphome/components/daikin
