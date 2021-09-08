@@ -12,10 +12,10 @@ void PanasonicClimate::transmit_state() {
                               0x20, 0xE0, 0x04, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00,
                               0x00, 0x06, 0x60, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00};
 
-  remote_state[13] = this->operation_mode_(); 
-  remote_state[14] = this->temperature_();   
-  uint16_t fan_speed = this->fan_speed_();   
-  remote_state[16] = fan_speed >> 8;         
+  remote_state[13] = this->operation_mode_();
+  remote_state[14] = this->temperature_();
+  uint16_t fan_speed = this->fan_speed_();
+  remote_state[16] = fan_speed >> 8;
 
   for (int i = 8; i < (PANASONIC_STATE_FRAME_SIZE - 1) ; i++) {
     remote_state[26] += remote_state[i];
@@ -149,14 +149,14 @@ bool PanasonicClimate::parse_state_frame_(const uint8_t frame[]) {
   if (!(temperature & 0xC0)) {
     this->target_temperature = temperature >> 1;
   }
-  
+
   uint8_t fan_mode = frame[16];
   uint8_t swing_mode = frame[16];
   if ( (fan_mode & 0xF) == 15 )
     this->swing_mode = climate::CLIMATE_SWING_OFF;
-  else 
+  else
     this->swing_mode = climate::CLIMATE_SWING_VERTICAL;
-      
+
   switch (fan_mode & 0xF0) {
     case PANASONIC_FAN_1:
     case PANASONIC_FAN_2:

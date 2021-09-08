@@ -26,13 +26,13 @@ const uint8_t PANASONIC_FAN_3 = 0x50;
 const uint8_t PANASONIC_FAN_5 = 0x70;
 
 // IR Transmission
-const uint32_t PANASONIC_IR_FREQUENCY = 38000;
+const uint32_t PANASONIC_IR_FREQUENCY = 36700;
 const uint32_t PANASONIC_HEADER_MARK = 3456;
 const uint32_t PANASONIC_HEADER_SPACE = 1728;
 const uint32_t PANASONIC_BIT_MARK = 432;
 const uint32_t PANASONIC_ONE_SPACE = 1296;
 const uint32_t PANASONIC_ZERO_SPACE = 432;
-const uint16_t PANASONIC_PAUSE = 9900;
+const uint16_t PANASONIC_PAUSE = 10000;
 
 // State Frame size
 const uint8_t PANASONIC_STATE_FRAME_SIZE = 27;

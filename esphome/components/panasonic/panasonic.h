@@ -11,7 +11,7 @@ const uint8_t PANASONIC_TEMP_MIN = 16;  // Celsius
 const uint8_t PANASONIC_TEMP_MAX = 30;  // Celsius
 
 // Modes
-const uint8_t PANASONIC_MODE_AUTO = 0x01;
+const uint8_t PANASONIC_MODE_AUTO = 0x00;
 const uint8_t PANASONIC_MODE_COOL = 0x30;
 const uint8_t PANASONIC_MODE_HEAT = 0x40;
 const uint8_t PANASONIC_MODE_DRY = 0x20;
@@ -36,13 +36,13 @@ const uint8_t PANASONIC_SWING_LOWEST = 0x05;
 const uint8_t PANASONIC_SWING_AUTO = 0x0F;
 
 // IR Transmission
-const uint32_t PANASONIC_IR_FREQUENCY = 38000;
+const uint32_t PANASONIC_IR_FREQUENCY = 36700;
 const uint32_t PANASONIC_HEADER_MARK = 3456;
 const uint32_t PANASONIC_HEADER_SPACE = 1728;
 const uint32_t PANASONIC_BIT_MARK = 432;
 const uint32_t PANASONIC_ONE_SPACE = 1296;
 const uint32_t PANASONIC_ZERO_SPACE = 432;
-const uint16_t PANASONIC_PAUSE = 9900;
+const uint16_t PANASONIC_PAUSE = 10000;
 
 // State Frame size
 const uint8_t PANASONIC_STATE_FRAME_SIZE = 27;
@@ -50,13 +50,13 @@ const uint8_t PANASONIC_STATE_FRAME_SIZE = 27;
 class PanasonicClimate : public climate_ir::ClimateIR {
  public:
   PanasonicClimate()
-      : climate_ir::ClimateIR(
-            PANASONIC_TEMP_MIN, PANASONIC_TEMP_MAX, 1.0f, true, false,
-            std::vector<climate::ClimateFanMode>{climate::CLIMATE_FAN_AUTO, climate::CLIMATE_FAN_LOW,
-                                                 climate::CLIMATE_FAN_MEDIUM, climate::CLIMATE_FAN_HIGH},
-            std::vector<climate::ClimateSwingMode>{climate::CLIMATE_SWING_HIGHEST, climate::CLIMATE_SWING_HIGH, climate::CLIMATE_SWING_MIDDLE,
-                                                   climate::CLIMATE_SWING_LOW, climate::CLIMATE_SWING_LOWEST, climate::CLIMATE_SWING_AUTO}) {}
+      : climate_ir::ClimateIR(PANASONIC_TEMP_MIN, PANASONIC_TEMP_MAX, 1.0f, true, false,
+                              {climate::CLIMATE_FAN_AUTO, climate::CLIMATE_FAN_LOW,
+                               climate::CLIMATE_FAN_MEDIUM, climate::CLIMATE_FAN_HIGH},
+                              {climate::CLIMATE_SWING_HIGHEST, climate::CLIMATE_SWING_HIGH, climate::CLIMATE_SWING_MIDDLE,
+                               climate::CLIMATE_SWING_LOW, climate::CLIMATE_SWING_LOWEST, climate::CLIMATE_SWING_AUTO}) {}
 
+ 
  protected:
   // Transmit via IR the state of this climate controller.
   void transmit_state() override;
