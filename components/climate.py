@@ -6,7 +6,7 @@ from esphome.const import CONF_ID
 AUTO_LOAD = ["climate_ir"]
 
 panasonic_ns = cg.esphome_ns.namespace("panasonic")
-PanasonicClimate = panasonic_ns.class_("PanasonicClimate", climate_ir.ClimateIR, climate.Climate)
+PanasonicClimate = panasonic_ns.class_("PanasonicClimate", climate_ir.ClimateIR)
 
 CONFIG_SCHEMA = climate_ir.CLIMATE_IR_WITH_RECEIVER_SCHEMA.extend(
     {
