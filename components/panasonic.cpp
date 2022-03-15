@@ -1,6 +1,5 @@
 #include "panasonic.h"
 #include "esphome/components/remote_base/remote_base.h"
-#include "esphome/core/log.h"
 
 namespace esphome {
 namespace panasonic {
