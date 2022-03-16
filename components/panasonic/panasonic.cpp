@@ -1,6 +1,5 @@
 #include "panasonic.h"
 #include "esphome/components/remote_base/remote_base.h"
-#include "esphome/core/log.h"
 
 namespace esphome {
 namespace panasonic {
@@ -22,7 +21,7 @@ void PanasonicClimate::transmit_state() {
   }
 
   auto transmit = this->transmitter_->transmit();
-  auto data = transmit.get_data();
+  auto *data = transmit.get_data();
   data->set_carrier_frequency(PANASONIC_IR_FREQUENCY);
 
   data->mark(PANASONIC_HEADER_MARK);
@@ -159,10 +158,10 @@ bool PanasonicClimate::parse_state_frame_(const uint8_t frame[]) {
 
   switch (fan_mode & 0xF0) {
     case PANASONIC_FAN_1:
-    case PANASONIC_FAN_2:
-    case PANASONIC_FAN_SILENT:
       this->fan_mode = climate::CLIMATE_FAN_LOW;
       break;
+    case PANASONIC_FAN_2:
+    case PANASONIC_FAN_SILENT:
     case PANASONIC_FAN_3:
       this->fan_mode = climate::CLIMATE_FAN_MEDIUM;
       break;
