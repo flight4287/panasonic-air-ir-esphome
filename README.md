@@ -9,6 +9,8 @@ Panaasonic Climat IR компонент для ESP Home.
 
 ##### YAML для добавления в конфигурацию ESP Home
 ```
+external_components:
+  - source: github://flight4287/panasonic-air-ir-esphome
 
 remote_transmitter:
   pin: D3
