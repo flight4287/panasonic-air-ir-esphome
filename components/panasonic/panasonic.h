@@ -42,9 +42,9 @@ class PanasonicClimate : public climate_ir::ClimateIR {
   PanasonicClimate()
       : climate_ir::ClimateIR(
             PANASONIC_TEMP_MIN, PANASONIC_TEMP_MAX, 1.0f, true, false,
-            std::vector<climate::ClimateFanMode>{climate::CLIMATE_FAN_AUTO, climate::CLIMATE_FAN_LOW,
-                                                 climate::CLIMATE_FAN_MEDIUM, climate::CLIMATE_FAN_HIGH},
-            std::vector<climate::ClimateSwingMode>{climate::CLIMATE_SWING_OFF, climate::CLIMATE_SWING_VERTICAL}) {}
+            {climate::CLIMATE_FAN_AUTO, climate::CLIMATE_FAN_LOW, climate::CLIMATE_FAN_MEDIUM,
+             climate::CLIMATE_FAN_HIGH},
+            {climate::CLIMATE_SWING_OFF, climate::CLIMATE_SWING_VERTICAL}) {}
 
  protected:
   // Transmit via IR the state of this climate controller.
