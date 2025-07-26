@@ -4,26 +4,25 @@
 namespace esphome {
 namespace panasonic {
 
-static const char *TAG = "panasonic.climate";
+static const char *const TAG = "panasonic.climate";
 
 void PanasonicClimate::transmit_state() {
   uint8_t remote_state[27] = {0x02, 0x20, 0xE0, 0x04, 0x00, 0x00, 0x00, 0x06, 0x02,
-                              0x20, 0xE0, 0x04, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00,
-                              0x00, 0x06, 0x60, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00};
+                              0x20, 0xE0, 0x04, 0x00, 0x00, 0x00, 0x80, 0x0F, 0x00,
+                              0x00, 0x06, 0x60, 0x00, 0x00, 0x80, 0x00, 0x06, 0x00};
 
   remote_state[13] = this->operation_mode_();
   remote_state[14] = this->temperature_();
-  uint16_t fan_speed = this->fan_speed_();
-  remote_state[16] = fan_speed >> 8;
+  remote_state[16] = fan_speed_swing_();
 
+  // Calculate checksum
   for (int i = 8; i < (PANASONIC_STATE_FRAME_SIZE - 1) ; i++) {
     remote_state[26] += remote_state[i];
   }
 
   auto transmit = this->transmitter_->transmit();
-  auto *data = transmit.get_data();
+  auto data = transmit.get_data();
   data->set_carrier_frequency(PANASONIC_IR_FREQUENCY);
-
   data->mark(PANASONIC_HEADER_MARK);
   data->space(PANASONIC_HEADER_SPACE);
 
@@ -37,7 +36,6 @@ void PanasonicClimate::transmit_state() {
 
   data->mark(PANASONIC_BIT_MARK);
   data->space(PANASONIC_PAUSE);
-
   data->mark(PANASONIC_HEADER_MARK);
   data->space(PANASONIC_HEADER_SPACE);
 
@@ -65,7 +63,7 @@ uint8_t PanasonicClimate::operation_mode_() {
     case climate::CLIMATE_MODE_HEAT:
       operating_mode |= PANASONIC_MODE_HEAT;
       break;
-    case climate::CLIMATE_MODE_AUTO:
+    case climate::CLIMATE_MODE_HEAT_COOL:
       operating_mode |= PANASONIC_MODE_AUTO;
       break;
     case climate::CLIMATE_MODE_OFF:
@@ -73,47 +71,45 @@ uint8_t PanasonicClimate::operation_mode_() {
       operating_mode = PANASONIC_MODE_OFF;
       break;
   }
-
   return operating_mode;
 }
 
-uint16_t PanasonicClimate::fan_speed_() {
+uint8_t PanasonicClimate::fan_speed_swing_() {
   uint16_t fan_speed;
-  switch (this->fan_mode) {
+  switch (this->fan_mode.value()) {
     case climate::CLIMATE_FAN_LOW:
-      fan_speed = PANASONIC_FAN_1 << 8;
+      fan_speed = PANASONIC_FAN_1;
       break;
     case climate::CLIMATE_FAN_MEDIUM:
-      fan_speed = PANASONIC_FAN_3 << 8;
+      fan_speed = PANASONIC_FAN_3;
       break;
     case climate::CLIMATE_FAN_HIGH:
-      fan_speed = PANASONIC_FAN_5 << 8;
+      fan_speed = PANASONIC_FAN_5;
       break;
     case climate::CLIMATE_FAN_AUTO:
     default:
-      fan_speed = PANASONIC_FAN_AUTO << 8;
+      fan_speed = PANASONIC_FAN_AUTO;
   }
-
   switch (this->swing_mode) {
     case climate::CLIMATE_SWING_VERTICAL:
-      fan_speed |= 0xF00;
-      break;
-    case climate::CLIMATE_SWING_OFF:
-      fan_speed |= 0x100;
+      fan_speed |= PANASONIC_SWING_HIGHEST;
       break;
     default:
+    case climate::CLIMATE_SWING_OFF:
+      fan_speed |= PANASONIC_SWING_AUTO;
       break;
   }
   return fan_speed;
 }
 
 uint8_t PanasonicClimate::temperature_() {
+  // Force special temperatures depending on the mode
   switch (this->mode) {
-    case climate::CLIMATE_MODE_AUTO:
+    case climate::CLIMATE_MODE_HEAT_COOL:
     case climate::CLIMATE_MODE_DRY:
       return 0xc0;
     default:
-      uint8_t temperature = (uint8_t) roundf(clamp(this->target_temperature, PANASONIC_TEMP_MIN, PANASONIC_TEMP_MAX));
+      uint8_t temperature = (uint8_t) roundf(clamp<float>(this->target_temperature, PANASONIC_TEMP_MIN, PANASONIC_TEMP_MAX));
       return temperature << 1;
   }
 }
@@ -138,12 +134,13 @@ bool PanasonicClimate::parse_state_frame_(const uint8_t frame[]) {
         this->mode = climate::CLIMATE_MODE_HEAT;
         break;
       case PANASONIC_MODE_AUTO:
-        this->mode = climate::CLIMATE_MODE_AUTO;
+        this->mode = climate::CLIMATE_MODE_HEAT_COOL;
         break;
     }
   } else {
     this->mode = climate::CLIMATE_MODE_OFF;
   }
+  
   uint8_t temperature = frame[14];
   if (!(temperature & 0xC0)) {
     this->target_temperature = temperature >> 1;
@@ -151,21 +148,22 @@ bool PanasonicClimate::parse_state_frame_(const uint8_t frame[]) {
 
   uint8_t fan_mode = frame[16];
   uint8_t swing_mode = frame[16];
-  if ( (fan_mode & 0xF) == 15 )
-    this->swing_mode = climate::CLIMATE_SWING_OFF;
-  else
-    this->swing_mode = climate::CLIMATE_SWING_VERTICAL;
+  switch (swing_mode & 0x0F) {
+    case PANASONIC_SWING_HIGHEST:
+      this->swing_mode = climate::CLIMATE_SWING_VERTICAL;
+      break;
+    case PANASONIC_SWING_AUTO:
+      this->swing_mode = climate::CLIMATE_SWING_OFF;
+      break;
+  }
 
   switch (fan_mode & 0xF0) {
     case PANASONIC_FAN_1:
       this->fan_mode = climate::CLIMATE_FAN_LOW;
       break;
-    case PANASONIC_FAN_2:
-    case PANASONIC_FAN_SILENT:
     case PANASONIC_FAN_3:
       this->fan_mode = climate::CLIMATE_FAN_MEDIUM;
       break;
-    case PANASONIC_FAN_4:
     case PANASONIC_FAN_5:
       this->fan_mode = climate::CLIMATE_FAN_HIGH;
       break;
@@ -191,6 +189,7 @@ bool PanasonicClimate::on_receive(remote_base::RemoteReceiveData data) {
         return false;
       }
     }
+      // frame header
     state_frame[pos] = byte;
     if (pos == 0) {
       if (byte != 0x02)

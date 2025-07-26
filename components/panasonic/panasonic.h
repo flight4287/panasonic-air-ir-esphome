@@ -5,10 +5,10 @@
 namespace esphome {
 namespace panasonic {
 
-// Values for Panasonic A75C3747 IR Controllers
+// Values for Panasonic ARC43XXX IR Controllers
 // Temperature
-const uint8_t PANASONIC_TEMP_MIN = 16;  // Celsius
-const uint8_t PANASONIC_TEMP_MAX = 30;  // Celsius
+const uint8_t PANASONIC_TEMP_MIN = 16;
+const uint8_t PANASONIC_TEMP_MAX = 30;
 
 // Modes
 const uint8_t PANASONIC_MODE_AUTO = 0x01;
@@ -22,8 +22,19 @@ const uint8_t PANASONIC_MODE_ON = 0x01;
 const uint8_t PANASONIC_FAN_AUTO = 0xA0;
 const uint8_t PANASONIC_FAN_SILENT = 0xB0;
 const uint8_t PANASONIC_FAN_1 = 0x30;
+const uint8_t PANASONIC_FAN_2 = 0x40;
 const uint8_t PANASONIC_FAN_3 = 0x50;
+const uint8_t PANASONIC_FAN_4 = 0x60;
 const uint8_t PANASONIC_FAN_5 = 0x70;
+
+// Swing state
+const uint8_t PANASONIC_SWING_OFF = 0x00;
+const uint8_t PANASONIC_SWING_HIGHEST = 0x01;
+const uint8_t PANASONIC_SWING_HIGH = 0x02;
+const uint8_t PANASONIC_SWING_MIDDLE = 0x03;
+const uint8_t PANASONIC_SWING_LOW = 0x04;
+const uint8_t PANASONIC_SWING_LOWEST = 0x05;
+const uint8_t PANASONIC_SWING_AUTO = 0x0F;
 
 // IR Transmission
 const uint32_t PANASONIC_IR_FREQUENCY = 36700;
@@ -40,17 +51,16 @@ const uint8_t PANASONIC_STATE_FRAME_SIZE = 27;
 class PanasonicClimate : public climate_ir::ClimateIR {
  public:
   PanasonicClimate()
-      : climate_ir::ClimateIR(
-            PANASONIC_TEMP_MIN, PANASONIC_TEMP_MAX, 1.0f, true, false,
-            {climate::CLIMATE_FAN_AUTO, climate::CLIMATE_FAN_LOW, climate::CLIMATE_FAN_MEDIUM,
-             climate::CLIMATE_FAN_HIGH},
-            {climate::CLIMATE_SWING_OFF, climate::CLIMATE_SWING_VERTICAL}) {}
+      : climate_ir::ClimateIR(PANASONIC_TEMP_MIN, PANASONIC_TEMP_MAX, 1.0f, true, false,
+                              {climate::CLIMATE_FAN_AUTO, climate::CLIMATE_FAN_LOW,climate::CLIMATE_FAN_MEDIUM,
+                               climate::CLIMATE_FAN_HIGH},
+                              {climate::CLIMATE_SWING_OFF, climate::CLIMATE_SWING_VERTICAL}) {}
 
  protected:
   // Transmit via IR the state of this climate controller.
   void transmit_state() override;
   uint8_t operation_mode_();
-  uint16_t fan_speed_();
+  uint8_t fan_speed_swing_();
   uint8_t temperature_();
     // Handle received IR Buffer
   bool on_receive(remote_base::RemoteReceiveData data) override;
